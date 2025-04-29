@@ -34,5 +34,12 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'meta' => [
+        'api_base_url' => env('META_API_BASE_URL'),
+        'api_version' => env('META_API_VERSION'),
+        'access_token' => env('META_ACCESS_TOKEN'),
+        'whatsapp' => [
+            'sender_id' => env('META_WHATSAPP_SENDER_ID'),
+        ]
+    ]
 ];
