@@ -40,6 +40,7 @@ return [
         'access_token' => env('META_ACCESS_TOKEN'),
         'whatsapp' => [
             'sender_id' => env('META_WHATSAPP_SENDER_ID'),
+            'business_id' => env('META_WHATSAPP_BUSINESS_ID'),
         ]
     ]
 ];
