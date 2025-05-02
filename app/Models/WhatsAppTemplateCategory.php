@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WhatsAppTemplateCategory extends Model
 {
@@ -11,13 +11,8 @@ class WhatsAppTemplateCategory extends Model
 
     public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null) {}
 
-    public function WhatsAppTemplates(): BelongsToMany
+    public function WhatsAppTemplates(): HasMany
     {
-        return $this->belongsToMany(
-            WhatsAppTemplate::class,
-            'whatsapp_template_whatsapp_template_category',
-            'whatsapp_template_category_id',
-            'whatsapp_template_id'
-        )->withTimestamps();
+        return $this->hasMany(WhatsAppTemplate::class, 'category_id');
     }
 }

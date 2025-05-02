@@ -17,8 +17,8 @@ return new class extends Migration
         Schema::create('whatsapp_templates', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(WhatsAppTemplateCategory::class, 'previous_category')->constrained();
-            $table->foreignIdFor(WhatsAppTemplateCategory::class, 'category')->constrained();
+            $table->foreignIdFor(WhatsAppTemplateCategory::class, 'previous_category_id')->constrained();
+            $table->foreignIdFor(WhatsAppTemplateCategory::class, 'category_id')->constrained();
             $table->string('meta_template_id')->unique();
             $table->string('name');
             $table->enum('status', ResourceStatusesEnum::values())->default(ResourceStatusesEnum::PENDING->value);
