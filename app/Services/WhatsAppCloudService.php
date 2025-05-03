@@ -76,4 +76,63 @@ class WhatsAppCloudService implements WhatsAppCloudServiceInterface
 
         return json_decode($response->body(), true);
     }
+
+    public function getTemplate(string $name, ?string $templateId = null): array
+    {
+        $queryParams = "name={$name}";
+
+        if ($templateId) {
+            $queryParams .= "&hsm_id={$templateId}";
+        }
+
+        $response = Http::withToken($this->accessToken)
+            ->throw()
+            ->get("{$this->apiBaseUrl}/v{$this->version}/{$this->businessId}/message_templates?{$queryParams}");
+
+        return json_decode($response->body(), true);
+    }
+
+    public function sendTemplateMessage(
+        string $recipient,
+        string $templateName,
+        string $languageCode,
+        array $bodyParams = [],
+        ?string $headerParam = null,
+    ): array {
+        $params = [
+            'messaging_product' => 'whatsapp',
+            'recipient_type' => 'individual',
+            'to' => $recipient,
+            'type' => 'template',
+            'template' => [
+                'name' => $templateName,
+                'language' => [
+                    'code' => $languageCode,
+                ],
+            ],
+        ];
+
+        if (!empty($bodyParams)) {
+            $params['template']['components'][] = [
+                'type' => 'body',
+                'parameters' => array_map(fn($param) => ['type' => 'text', 'text' => $param], $bodyParams),
+            ];
+        }
+
+        if (!is_null($headerParam)) {
+            $params['template']['components'][] = [
+                'type' => 'header',
+                'parameters' => [[
+                    'type' => 'text',
+                    'text' => $headerParam,
+                ]],
+            ];
+        }
+
+        $response = Http::withToken($this->accessToken)
+            ->throw()
+            ->post("{$this->apiBaseUrl}/v{$this->version}/{$this->senderId}/messages", $params);
+
+        return json_decode($response->body(), true);
+    }
 }
