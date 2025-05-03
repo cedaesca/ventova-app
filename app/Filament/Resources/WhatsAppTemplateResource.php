@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ResourceStatusesEnum;
 use App\Filament\Resources\WhatsAppTemplateResource\Pages;
 use App\Filament\Resources\WhatsAppTemplateResource\RelationManagers;
+use App\Interfaces\Services\WhatsAppCloudServiceInterface;
 use App\Models\WhatsAppTemplate;
 use Filament\Actions\CreateAction;
 use Filament\Forms;
@@ -17,12 +18,15 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Unique;
 
 class WhatsAppTemplateResource extends Resource
@@ -169,6 +173,80 @@ class WhatsAppTemplateResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Testear')
+                    ->modal()
+                    ->modalHeading('Testear plantilla')
+                    ->form(function (Form $form, WhatsAppTemplate $record) {
+                        $wsCloudService = app()->get(WhatsAppCloudServiceInterface::class);
+
+                        /** @var array  */
+                        $metaTemplate = Cache::remember($record->meta_template_id, 3600, function () use ($wsCloudService, $record) {
+                            return $wsCloudService->getTemplate($record->name, $record->meta_template_id)['data'][0];
+                        });
+
+                        $templateComponents = $metaTemplate['components'];
+
+                        $header = array_find($templateComponents, fn($c) => $c['type'] === 'HEADER');
+                        $body = array_find($templateComponents, fn($c) => $c['type'] === 'BODY');
+
+                        $headerVariableInput = null;
+                        $bodyVariableInputs = [];
+
+                        if (isset($header['example'])) {
+                            $headerVariableInput = TextInput::make('header_variable')
+                                ->label('Variable de encabezado')
+                                ->maxLength(60)
+                                ->required()
+                                ->placeholder($header['example']['header_text'][0]);
+                        }
+
+                        foreach ($body['example']['body_text'][0] as $key => $value) {
+                            $bodyVariableInputs[] = TextInput::make('body_variables.' . $key + 1)
+                                ->label('Cuerpo - Valor de variable ' . $key + 1)
+                                ->maxLength(60)
+                                ->required()
+                                ->placeholder($value);
+                        }
+
+                        return $form->schema([
+                            Select::make('sender_phone_number')
+                                ->label('Número de teléfono del remitente')
+                                ->options(['+15551613873' => '+15551613873 (Teléfono de prueba)'])
+                                ->required(),
+                            Select::make('recipient_phone_number')
+                                ->label('Número de teléfono del destinatario')
+                                ->hint('Solo se muestran números autorizados')
+                                ->options(['584143573254' => '+584143573254'])
+                                ->required(),
+                            TextInput::make('header')
+                                ->label('Encabezado')
+                                ->readOnly()
+                                ->columnSpanFull()
+                                ->default($header['text']),
+                            $headerVariableInput,
+                            Textarea::make('body')
+                                ->label('Cuerpo')
+                                ->readOnly()
+                                ->columnSpanFull()
+                                ->default($body['text']),
+                            ...$bodyVariableInputs,
+                        ]);
+                    })
+                    ->action(function (array $data, WhatsAppTemplate $record) {
+                        $wsCloudService = app()->get(WhatsAppCloudServiceInterface::class);
+
+                        $response = $wsCloudService->sendTemplateMessage(
+                            $data['recipient_phone_number'],
+                            $record->name,
+                            $record->language_code,
+                            $data['body_variables'] ?? [],
+                            $data['header_variable'] ?? null,
+                        );
+
+                        Log::debug('WhatsAppTemplateResource:Test', [
+                            'response' => $response
+                        ]);
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
