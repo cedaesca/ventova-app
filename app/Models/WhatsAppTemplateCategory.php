@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class WhatsAppTemplateCategory extends Model
 {
     protected $guarded = [];
+    protected $table = 'whatsapp_template_categories';
 
     public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null) {}
 
