@@ -11,5 +11,5 @@ interface WhatsAppCloudServiceInterface
     public function setVersion(string $version): self;
     public function setSenderId(string $senderId): self;
     public function setBusinessId(string $businessId): self;
-    public function createTemplate(string $name, string $categoryId, string $languageCode, array $components): Response;
+    public function createTemplate(string $name, string $categoryId, string $languageCode, array $components): array;
 }
