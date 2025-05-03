@@ -14,9 +14,12 @@ class TestAccountSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        $user = User::factory()->create([
             'password' => Hash::make('password'),
             'email' => 'test@test.com'
         ]);
+
+        $user->is_admin = true;
+        $user->save();
     }
 }

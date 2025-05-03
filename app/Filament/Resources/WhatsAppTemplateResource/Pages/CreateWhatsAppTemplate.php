@@ -25,4 +25,9 @@ class CreateWhatsAppTemplate extends CreateRecord
 
         return $template;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }
