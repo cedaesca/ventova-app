@@ -22,7 +22,8 @@ class WhatsAppCloudService implements WhatsAppCloudServiceInterface
         $this->setApiBaseUrl($metaConfig['api_base_url'])
             ->setVersion($metaConfig['api_version'])
             ->setAccessToken($metaConfig['access_token'])
-            ->setSenderId($metaConfig['whatsapp']['sender_id']);
+            ->setSenderId($metaConfig['whatsapp']['sender_id'])
+            ->setBusinessId($metaConfig['whatsapp']['business_id']);
     }
 
     public function setVersion(string $version): self
@@ -60,26 +61,19 @@ class WhatsAppCloudService implements WhatsAppCloudServiceInterface
         return $this;
     }
 
-    public function createTemplate(string $name, string $categoryId, string $languageCode, array $components): Response
+    public function createTemplate(string $name, string $categoryId, string $languageCode, array $components): array
     {
+        $params = [
+            'name' => $name,
+            'language' => $languageCode,
+            'category' => $categoryId,
+            'components' => $components,
+        ];
+
         $response = Http::withToken($this->accessToken)
             ->throw()
-            ->post("{$this->apiBaseUrl}/v{$this->version}/{$this->senderId}/message_templates", [
-                'name' => $name,
-                'language' => $languageCode,
-                'category' => $categoryId,
-                'components' => $components,
-            ]);
+            ->post("{$this->apiBaseUrl}/v{$this->version}/{$this->businessId}/message_templates", $params);
 
-        if ($response->failed()) {
-            Log::error('WhatsApp Cloud API Error', [
-                'response' => $response->json(),
-                'status_code' => $response->status(),
-            ]);
-
-            throw new \Exception('Failed to communicate with WhatsApp Cloud API');
-        }
-
-        return $response;
+        return json_decode($response->body(), true);
     }
 }

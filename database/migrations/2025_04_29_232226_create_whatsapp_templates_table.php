@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(WhatsAppTemplateCategory::class, 'previous_category_id')->constrained();
             $table->foreignIdFor(WhatsAppTemplateCategory::class, 'category_id')->constrained();
             $table->string('meta_template_id')->nullable();
+            $table->string('meta_reject_reason')->nullable();
             $table->string('name');
             $table->enum('status', ResourceStatusesEnum::values())->default(ResourceStatusesEnum::PENDING->value);
             $table->string('language_code', 8);
