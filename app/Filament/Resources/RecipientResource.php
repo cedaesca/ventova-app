@@ -67,7 +67,11 @@ class RecipientResource extends VentovaResource
             $group = Auth::user()->recipientGroups()
                 ->where('name', $groupName)
                 ->first();
+        } else {
+            $group = Auth::user()->recipientGroups()->first();
         }
+
+        $dynamicTableColumns = self::getDynamicTableColumns($group);
 
         return $table
             ->columns([
@@ -81,6 +85,7 @@ class RecipientResource extends VentovaResource
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
+                ...$dynamicTableColumns,
             ])
             ->filters([
                 //
@@ -110,5 +115,28 @@ class RecipientResource extends VentovaResource
             'edit' => Pages\EditRecipient::route('/{record}/edit'),
             'import' => Pages\ImportRecipients::route('/import'),
         ];
+    }
+
+    private static function getDynamicTableColumns(?RecipientGroup $group): array
+    {
+        if (!$group) {
+            return [];
+        }
+
+        $variableLabels = $group->recipients()
+            ->join('recipient_variables', 'recipients.id', '=', 'recipient_variables.recipient_id')
+            ->distinct()
+            ->pluck('recipient_variables.label');
+
+        return $variableLabels->map(function ($label) {
+            return TextColumn::make('variables.' . $label)
+                ->label($label)
+                ->sortable()
+                ->searchable()
+                ->toggleable()
+                ->getStateUsing(function ($record) use ($label) {
+                    return optional($record->variables->firstWhere('label', $label))->value;
+                });
+        })->toArray();
     }
 }

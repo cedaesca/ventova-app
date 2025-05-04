@@ -6,6 +6,7 @@ use App\Models\RecipientGroup;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -52,6 +53,13 @@ class RecipientsImport implements ToCollection, WithHeadingRow, WithChunkReading
                 }
 
                 $isDateTime = $this->isFieldValidDateTime($value);
+
+
+                Log::debug('Variable', [
+                    'label' => $label,
+                    'value' => $value,
+                    'isDateTime' => $isDateTime,
+                ]);
 
                 $recipient->variables()->create([
                     'label' => trim($label),
