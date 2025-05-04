@@ -44,6 +44,7 @@ class RecipientResource extends VentovaResource
                     )
                     ->columnSpanFull(),
                 FileUpload::make('file')
+                    ->disk('local')
                     ->label('Archivo Excel')
                     ->required()
                     ->directory('recipients')

@@ -6,6 +6,7 @@ use App\Filament\Resources\RecipientResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CreateRecipient extends CreateRecord
 {
@@ -13,8 +14,9 @@ class CreateRecipient extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $uploadedFile = $data['file'] ?? null;
+        $filePath = $data['file'];
+        $fileInstance = Storage::disk('local')->get($filePath);
 
-        dd($uploadedFile);
+        return parent::handleRecordCreation($data);
     }
 }
