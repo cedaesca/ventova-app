@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 
 class RecipientGroupResource extends VentovaResource
 {
@@ -32,21 +33,6 @@ class RecipientGroupResource extends VentovaResource
         return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
     }
 
-    public static function canEdit(Model $record): bool
-    {
-        return $record->user_id === Auth::user()->id || Auth::user()->isAdmin();
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return $record->user_id === Auth::user()->id || Auth::user()->isAdmin();
-    }
-
-    public static function canView(Model $record): bool
-    {
-        return $record->user_id === Auth::user()->id || Auth::user()->isAdmin();
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -54,6 +40,10 @@ class RecipientGroupResource extends VentovaResource
                 TextInput::make('name')
                     ->label('Nombre')
                     ->required()
+                    ->unique(
+                        modifyRuleUsing: fn(Unique $rule) => $rule->where('user_id', Auth::user()->id),
+                        ignoreRecord: true,
+                    )
                     ->maxLength(255),
                 TextInput::make('description')
                     ->label('Descripción')
@@ -64,6 +54,7 @@ class RecipientGroupResource extends VentovaResource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->withCount('recipients'))
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
@@ -79,6 +70,18 @@ class RecipientGroupResource extends VentovaResource
                     ->label('Descripción')
                     ->sortable()
                     ->searchable()
+                    ->toggleable(),
+                TextColumn::make('recipients_count')
+                    ->label('Destinatarios')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable()
+                    ->badge(),
+                TextColumn::make('is_importing')
+                    ->label('Importando')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => (bool) $state ? 'Sí' : 'No')
                     ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('Creado')

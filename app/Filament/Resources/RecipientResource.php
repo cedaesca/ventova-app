@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\RecipientResource\Pages;
+use App\Filament\Resources\RecipientResource\RelationManagers;
+use App\Models\Recipient;
+use App\Models\RecipientGroup;
+use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
+
+class RecipientResource extends VentovaResource
+{
+    protected static ?string $model = Recipient::class;
+
+    protected static ?string $navigationIcon = 'phosphor-phone';
+    protected static ?string $navigationLabel = 'Destinatarios';
+    protected static ?string $breadcrumb = 'Destinatarios';
+    protected static ?string $label = 'destinatarios';
+    protected static ?string $navigationGroup = 'Envíos masivos';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Select::make('recipient_group_id')
+                    ->label('Grupo de destinatarios')
+                    ->searchable()
+                    ->required()
+                    ->options(
+                        RecipientGroup::query()
+                            ->where('user_id', Auth::user()->id)
+                            ->whereHas(relation: 'recipients', operator: '<', count: 1)
+                            ->pluck('name', 'id')
+                    )
+                    ->columnSpanFull(),
+                FileUpload::make('file')
+                    ->label('Archivo Excel')
+                    ->required()
+                    ->directory('recipients')
+                    ->acceptedFileTypes([
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-excel',
+                    ])
+                    ->maxSize(1024 * 5)
+                    ->hint('El archivo debe tener obligatoriamente una columna con el nombre "phone_number".')
+                    ->columnSpanFull()
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        $groupName = request()->query('activeTab');
+        $group = null;
+
+        if ($groupName) {
+            $group = Auth::user()->recipientGroups()
+                ->where('name', $groupName)
+                ->first();
+        }
+
+        return $table
+            ->columns([
+                TextColumn::make('uuid')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('phone_number')
+                    ->label('Número de teléfono')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListRecipients::route('/'),
+            'create' => Pages\CreateRecipient::route('/create'),
+            'edit' => Pages\EditRecipient::route('/{record}/edit'),
+        ];
+    }
+}

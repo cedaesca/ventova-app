@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('recipients', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(RecipientGroup::class)->nullable()->constrained()->nullOnDelete();
             $table->string('phone_number');
