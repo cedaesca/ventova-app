@@ -106,8 +106,9 @@ class RecipientResource extends VentovaResource
     {
         return [
             'index' => Pages\ListRecipients::route('/'),
-            'create' => Pages\CreateRecipient::route('/create'),
+            //'create' => Pages\CreateRecipient::route('/create'),
             'edit' => Pages\EditRecipient::route('/{record}/edit'),
+            'import' => Pages\ImportRecipients::route('/import'),
         ];
     }
 }

@@ -18,7 +18,11 @@ class ListRecipients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            //Actions\CreateAction::make(),
+            Actions\Action::make('Importar')
+                ->label('Importar destinatarios')
+                ->color('primary')
+                ->url(self::getResource()::getUrl('import'))
         ];
     }
 
