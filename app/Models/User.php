@@ -64,4 +64,14 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->is_admin;
     }
+
+    public function recipientGroups(): HasMany
+    {
+        return $this->hasMany(RecipientGroup::class);
+    }
+
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(Recipient::class);
+    }
 }
