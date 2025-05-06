@@ -17,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class RecipientResource extends VentovaResource
 {
@@ -60,16 +61,11 @@ class RecipientResource extends VentovaResource
 
     public static function table(Table $table): Table
     {
-        $groupName = request()->query('activeTab');
-        $group = null;
+        $activeTab = $table->getLivewire()->activeTab;
 
-        if ($groupName) {
-            $group = Auth::user()->recipientGroups()
-                ->where('name', $groupName)
-                ->first();
-        } else {
-            $group = Auth::user()->recipientGroups()->first();
-        }
+        $group = Auth::user()->recipientGroups()
+            ->where('name', $activeTab)
+            ->first();
 
         $dynamicTableColumns = self::getDynamicTableColumns($group);
 
@@ -128,7 +124,7 @@ class RecipientResource extends VentovaResource
             ->distinct()
             ->pluck('recipient_variables.label');
 
-        return $variableLabels->map(function ($label) {
+        return $variableLabels->map(function ($label) use ($group) {
             return TextColumn::make('variables.' . $label)
                 ->label($label)
                 ->sortable()

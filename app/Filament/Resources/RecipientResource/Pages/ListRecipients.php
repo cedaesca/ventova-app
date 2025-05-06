@@ -10,6 +10,7 @@ use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ListRecipients extends ListRecords
 {
@@ -24,6 +25,12 @@ class ListRecipients extends ListRecords
                 ->color('primary')
                 ->url(self::getResource()::getUrl('import'))
         ];
+    }
+
+    public function updatedActiveTab(): void
+    {
+        //parent::updatedActiveTab();
+        $this->resetTable();
     }
 
     public function getTabs(): array
