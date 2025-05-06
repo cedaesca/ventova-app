@@ -29,13 +29,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Unique;
 
-class WhatsAppTemplateResource extends Resource
+class WhatsAppTemplateResource extends VentovaResource
 {
     protected static ?string $model = WhatsAppTemplate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'icomoon-insert-template';
     protected static ?string $navigationLabel = 'Plantillas';
-    protected static ?string $navigationGroup = 'WhatsApp';
+    protected static ?string $navigationGroup = 'Envíos masivos';
     protected static ?string $breadcrumb = 'Plantillas';
     protected static ?string $label = 'Plantilla';
     protected static ?string $slug = 'whatsapp/templates';

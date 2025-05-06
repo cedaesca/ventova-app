@@ -59,4 +59,19 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(WhatsAppTemplate::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    public function recipientGroups(): HasMany
+    {
+        return $this->hasMany(RecipientGroup::class);
+    }
+
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(Recipient::class);
+    }
 }

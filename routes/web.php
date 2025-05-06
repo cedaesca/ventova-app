@@ -1,8 +1,6 @@
 <?php
 
-use App\Enums\ResourceStatusesEnum;
 use App\Models\WhatsAppTemplate;
-use App\Models\WhatsAppTemplateCategory;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
